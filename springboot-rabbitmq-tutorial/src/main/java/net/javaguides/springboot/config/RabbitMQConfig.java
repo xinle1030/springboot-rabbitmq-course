@@ -29,34 +29,36 @@ public class RabbitMQConfig {
 
     // spring bean for rabbitmq queue
     @Bean
-    public Queue queue(){
+    public Queue queue() {
+        // pass queue name from ${rabbitmq.queue.name}
         return new Queue(queue);
     }
 
     // spring bean for queue (store json messages)
     @Bean
-    public Queue jsonQueue(){
+    public Queue jsonQueue() {
         return new Queue(jsonQueue);
     }
 
     // spring bean for rabbitmq exchange
     @Bean
-    public TopicExchange exchange(){
+    public TopicExchange exchange() {
+        // pass exchange name from ${rabbitmq.exchange.name}
         return new TopicExchange(exchange);
     }
 
     // binding between queue and exchange using routing key
     @Bean
-    public Binding binding(){
+    public Binding binding() {
         return BindingBuilder
                 .bind(queue())
                 .to(exchange())
-                .with(routingKey);
+                .with(routingKey); // routingKey name
     }
 
     // binding between json queue and exchange using routing key
     @Bean
-    public Binding jsonBinding(){
+    public Binding jsonBinding() {
         return BindingBuilder
                 .bind(jsonQueue())
                 .to(exchange())
@@ -64,18 +66,21 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public MessageConverter converter(){
+    public MessageConverter converter() {
         return new Jackson2JsonMessageConverter();
     }
 
+    // create a rabbit template that support sending json messages using a message converter that we set
     @Bean
-    public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory){
+    public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(converter());
         return rabbitTemplate;
     }
 
-    // ConnectionFactory
-    // RabbitTemplate
-    // RabbitAdmin
+    // Springboot AutoConfiguration will automatically configure the 3
+    // infrastructure beans below so we dh to manually configure them
+    // - ConnectionFactory
+    // - RabbitTemplate
+    // - RabbitAdmin
 }
